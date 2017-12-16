@@ -27,29 +27,14 @@ import android.view.inputmethod.InputMethodManager;
 import com.kabouzeid.appthemehelper.util.TintHelper;
 import com.kabouzeid.gramophone.R;
 
-/**
- * @author Karim Abou Zeid (kabouzeid)
- */
 public class Util {
 
     public static int getActionBarSize(@NonNull Context context) {
-        TypedValue typedValue = new TypedValue();
-        int[] textSizeAttr = new int[]{R.attr.actionBarSize};
-        int indexOfAttrTextSize = 0;
-        TypedArray a = context.obtainStyledAttributes(typedValue.data, textSizeAttr);
-        int actionBarSize = a.getDimensionPixelSize(indexOfAttrTextSize, -1);
-        a.recycle();
-        return actionBarSize;
+        return getAttr(context, R.attr.actionBarSize);
     }
 
-    public static int getDividerColor(@NonNull Context context){
-        TypedValue typedValue = new TypedValue();
-        int[] dividerColorAttr = new int[]{R.attr.dividerColor};
-        int indexOfDividerColor = 0;
-        TypedArray a = context.obtainStyledAttributes(typedValue.data, dividerColorAttr);
-        int color = a.getColor(indexOfDividerColor, 0);
-        a.recycle();
-        return color;
+    public static int getDividerColor(@NonNull Context context) {
+        return getAttr(context, R.attr.dividerColor);
     }
 
     public static Point getScreenSize(@NonNull Context c) {
@@ -143,6 +128,15 @@ public class Util {
             default:
                 return false;
         }
+    }
+
+    private static int getAttr(@NonNull Context context, int attrKey) {
+        TypedValue typedValue = new TypedValue();
+        int[] attr = new int[]{attrKey};
+        TypedArray a = context.obtainStyledAttributes(typedValue.data, attr);
+        int value = a.getColor(0, 0);
+        a.recycle();
+        return value;
     }
 
 }
