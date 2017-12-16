@@ -119,7 +119,7 @@ public class PlaylistDetailActivity extends AbsSlidingMusicPanelActivity impleme
 
             recyclerView.setAdapter(wrappedAdapter);
             recyclerView.setItemAnimator(animator);
-            recyclerView.addItemDecoration(new HorizontalItemDivider(this, Util.getDividerColor(this), 72));
+            recyclerView.addItemDecoration(new HorizontalItemDivider(this));
             recyclerViewDragDropManager.attachRecyclerView(recyclerView);
         }
 

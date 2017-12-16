@@ -195,7 +195,7 @@ public class FoldersFragment extends AbsMainActivityFragment implements MainActi
         ViewUtil.setUpFastScrollRecyclerViewColor(getActivity(), recyclerView, ThemeStore.accentColor(getActivity()));
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.addItemDecoration(new HorizontalItemDivider(getMainActivity(), Util.getDividerColor(getMainActivity()), 72));
+        recyclerView.addItemDecoration(new HorizontalItemDivider(getMainActivity()));
         appbar.addOnOffsetChangedListener(this);
     }
 

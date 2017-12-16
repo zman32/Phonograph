@@ -221,7 +221,7 @@ public class AlbumDetailActivity extends AbsSlidingMusicPanelActivity implements
                 recyclerView.scrollBy(0, -1);
             }
         });
-        recyclerView.addItemDecoration(new HorizontalItemDivider(this, Util.getDividerColor(this), 72));
+        recyclerView.addItemDecoration(new HorizontalItemDivider(this));
     }
 
     private void setUpRecyclerViewPadding() {

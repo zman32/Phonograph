@@ -70,7 +70,7 @@ public abstract class AbsLibraryPagerRecyclerViewFragment<A extends RecyclerView
         }
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
-        divider = new HorizontalItemDivider(getActivity(), Util.getDividerColor(getActivity()), 72);
+        divider = new HorizontalItemDivider(getActivity());
         addItemDecoration();
     }
 

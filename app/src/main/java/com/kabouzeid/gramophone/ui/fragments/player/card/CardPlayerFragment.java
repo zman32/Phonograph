@@ -273,7 +273,7 @@ public class CardPlayerFragment extends AbsPlayerFragment implements PlayerAlbum
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(wrappedAdapter);
         recyclerView.setItemAnimator(animator);
-        recyclerView.addItemDecoration(new HorizontalItemDivider(getActivity(), Util.getDividerColor(getActivity()), 72));
+        recyclerView.addItemDecoration(new HorizontalItemDivider(getActivity()));
         recyclerViewDragDropManager.attachRecyclerView(recyclerView);
 
         layoutManager.scrollToPositionWithOffset(MusicPlayerRemote.getPosition() + 1, 0);
