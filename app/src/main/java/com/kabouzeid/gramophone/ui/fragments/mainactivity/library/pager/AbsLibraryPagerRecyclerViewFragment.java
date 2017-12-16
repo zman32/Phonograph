@@ -15,7 +15,9 @@ import android.widget.TextView;
 
 import com.kabouzeid.appthemehelper.ThemeStore;
 import com.kabouzeid.gramophone.R;
+import com.kabouzeid.gramophone.util.Util;
 import com.kabouzeid.gramophone.util.ViewUtil;
+import com.kabouzeid.gramophone.views.HorizontalItemDivider;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import butterknife.BindView;
@@ -42,6 +44,8 @@ public abstract class AbsLibraryPagerRecyclerViewFragment<A extends RecyclerView
     private A adapter;
     private LM layoutManager;
 
+    private HorizontalItemDivider divider;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(getLayoutRes(), container, false);
@@ -66,6 +70,8 @@ public abstract class AbsLibraryPagerRecyclerViewFragment<A extends RecyclerView
         }
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+        divider = new HorizontalItemDivider(getActivity(), Util.getDividerColor(getActivity()), 72);
+        addItemDecoration();
     }
 
     protected void invalidateLayoutManager() {
@@ -77,6 +83,14 @@ public abstract class AbsLibraryPagerRecyclerViewFragment<A extends RecyclerView
         initAdapter();
         checkIsEmpty();
         recyclerView.setAdapter(adapter);
+    }
+
+    protected void removeItemDecoration(){
+        recyclerView.removeItemDecoration(divider);
+    }
+
+    protected void addItemDecoration(){
+        recyclerView.addItemDecoration(divider);
     }
 
     private void initAdapter() {

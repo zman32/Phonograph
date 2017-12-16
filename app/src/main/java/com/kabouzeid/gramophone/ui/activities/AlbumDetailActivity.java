@@ -54,6 +54,7 @@ import com.kabouzeid.gramophone.ui.activities.tageditor.AlbumTagEditorActivity;
 import com.kabouzeid.gramophone.util.NavigationUtil;
 import com.kabouzeid.gramophone.util.PhonographColorUtil;
 import com.kabouzeid.gramophone.util.Util;
+import com.kabouzeid.gramophone.views.HorizontalItemDivider;
 
 import java.util.Locale;
 
@@ -221,6 +222,7 @@ public class AlbumDetailActivity extends AbsSlidingMusicPanelActivity implements
                 recyclerView.scrollBy(0, -1);
             }
         });
+        recyclerView.addItemDecoration(new HorizontalItemDivider(this, Util.getDividerColor(this), 72));
     }
 
     private void setUpRecyclerViewPadding() {
