@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.support.annotation.ColorInt;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 
 import com.kabouzeid.gramophone.adapter.song.AbsOffsetSongAdapter;

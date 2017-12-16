@@ -4,7 +4,6 @@ package com.kabouzeid.gramophone.ui.fragments.mainactivity.folders;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.os.Environment;

@@ -56,9 +56,8 @@ import com.kabouzeid.gramophone.util.PhonographColorUtil;
 import com.kabouzeid.gramophone.util.Util;
 import com.kabouzeid.gramophone.views.HorizontalItemDivider;
 
-import java.util.Locale;
-
 import java.util.ArrayList;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
