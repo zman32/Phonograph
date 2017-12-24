@@ -11,7 +11,6 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.util.DialogUtils;
 import com.kabouzeid.appthemehelper.ThemeStore;
@@ -59,10 +58,10 @@ public class LibraryPreferenceDialog extends DialogFragment {
                 .onPositive((dialog13, action) -> {
                     if (!updateCategories(adapter.getCategories())) {
                         new MaterialDialog.Builder(getContext())
-                            .title(R.string.edit_categories)
-                            .content(R.string.at_least_one_category_must_be_enabled)
-                            .positiveText(android.R.string.ok)
-                            .show();
+                                .title(R.string.edit_categories)
+                                .content(R.string.at_least_one_category_must_be_enabled)
+                                .positiveText(android.R.string.ok)
+                                .show();
                     } else {
                         dismiss();
                     }
@@ -84,7 +83,7 @@ public class LibraryPreferenceDialog extends DialogFragment {
         int selected = 0;
         for (Category category : categories) {
             if (category.visible)
-                selected ++;
+                selected++;
         }
         return selected;
     }
@@ -92,17 +91,17 @@ public class LibraryPreferenceDialog extends DialogFragment {
     private ColorStateList getCheckboxColors() {
         int disabledColor = DialogUtils.getDisabledColor(getContext());
         return new ColorStateList(
-                new int[][] {
-                    new int[] {android.R.attr.state_enabled, -android.R.attr.state_checked},
-                    new int[] {android.R.attr.state_enabled, android.R.attr.state_checked},
-                    new int[] {-android.R.attr.state_enabled, -android.R.attr.state_checked},
-                    new int[] {-android.R.attr.state_enabled, android.R.attr.state_checked}
+                new int[][]{
+                        new int[]{android.R.attr.state_enabled, -android.R.attr.state_checked},
+                        new int[]{android.R.attr.state_enabled, android.R.attr.state_checked},
+                        new int[]{-android.R.attr.state_enabled, -android.R.attr.state_checked},
+                        new int[]{-android.R.attr.state_enabled, android.R.attr.state_checked}
                 },
-                new int[] {
-                    DialogUtils.resolveColor(getContext(), R.attr.colorControlNormal),
-                    ThemeStore.accentColor(getContext()),
-                    disabledColor,
-                    disabledColor
+                new int[]{
+                        DialogUtils.resolveColor(getContext(), R.attr.colorControlNormal),
+                        ThemeStore.accentColor(getContext()),
+                        disabledColor,
+                        disabledColor
                 });
     }
 }
