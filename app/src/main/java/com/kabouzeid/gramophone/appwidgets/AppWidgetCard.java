@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v7.graphics.Palette;
@@ -25,9 +26,120 @@ import com.kabouzeid.gramophone.model.Song;
 import com.kabouzeid.gramophone.service.MusicService;
 import com.kabouzeid.gramophone.ui.activities.MainActivity;
 import com.kabouzeid.gramophone.util.Util;
+import com.kabouzeid.gramophone.util.NotificationColorUtil;
+
+
+
+
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.os.Build;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.app.Notification;
+import android.support.graphics.drawable.VectorDrawableCompat;
+import android.support.v4.content.ContextCompat;
+
+import android.support.v7.graphics.Palette;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.RemoteViews;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.Target;
+
+import com.kabouzeid.appthemehelper.util.MaterialValueHelper;
+import com.kabouzeid.appthemehelper.util.TintHelper;
+import com.kabouzeid.gramophone.R;
+import com.kabouzeid.gramophone.appwidgets.base.BaseAppWidget;
+import com.kabouzeid.gramophone.glide.SongGlideRequest;
+import com.kabouzeid.gramophone.glide.palette.BitmapPaletteWrapper;
+import com.kabouzeid.gramophone.model.Song;
+import com.kabouzeid.gramophone.service.MusicService;
+import com.kabouzeid.gramophone.ui.activities.MainActivity;
+
+import com.kabouzeid.gramophone.util.NotificationColorUtil;
+
+import com.kabouzeid.gramophone.util.Util;
+
+import android.content.res.Resources;
+
+import android.graphics.LinearGradient;
+
+import android.graphics.Paint;
+import android.graphics.PorterDuffXfermode;
+
+import android.graphics.PorterDuff.Mode;
+import android.graphics.Shader.TileMode;
+
+
+import java.util.List;
+
+
+
+
+
+
+
+
+
 
 public class AppWidgetCard extends BaseAppWidget {
     public static final String NAME = "app_widget_card";
+
+
+    //google's code
+    /**
+     * The fraction below which we select the vibrant instead of the light/dark vibrant color
+     */
+    private static final float POPULATION_FRACTION_FOR_MORE_VIBRANT = 1.0f; // 1f
+    /**
+     * Minimum saturation that a muted color must have if there exists if deciding between two
+     * colors
+     */
+    private static final float MIN_SATURATION_WHEN_DECIDING = 0.19f;  //0.19
+    /**
+     * Minimum fraction that any color must have to be picked up as a text color
+     */
+    private static final double MINIMUM_IMAGE_FRACTION = 0.002;
+    /**
+     * The population fraction to select the dominant color as the text color over a the colored
+     * ones.
+     */
+    //private static final float POPULATION_FRACTION_FOR_DOMINANT = 0.01f;
+    private static final float POPULATION_FRACTION_FOR_DOMINANT = 0.01f;
+    /**
+     *
+     */
+    private static final float POPULATION_FRACTION_FOR_WHITE_OR_BLACK = 2.5f;  //2.5f higher is less chance sets background white or black
+    private static final float BLACK_MAX_LIGHTNESS = 0.08f;
+    private static final float WHITE_MIN_LIGHTNESS = 0.90f;
+    private static final int RESIZE_BITMAP_AREA = 150* 150;  //150 * 150
+
+    private float[] mFilteredBackgroundHsl = null;
+    private Palette.Filter mBlackWhiteFilter = (rgb, hsl) -> !isWhiteOrBlack(hsl);
+
+
+
+
+
+
+
+
+
+
+
+
 
     private static AppWidgetCard mInstance;
     private static int imageSize = 0;
@@ -92,6 +204,9 @@ public class AppWidgetCard extends BaseAppWidget {
         if (cardRadius == 0f)
             cardRadius = service.getResources().getDimension(R.dimen.app_widget_card_radius);
 
+
+        final Context appContext = service.getApplicationContext();
+
         // Load the album cover async and push the update on completion
         service.runOnUiThread(new Runnable() {
             @Override
@@ -113,28 +228,373 @@ public class AppWidgetCard extends BaseAppWidget {
                             @Override
                             public void onLoadFailed(Exception e, Drawable errorDrawable) {
                                 super.onLoadFailed(e, errorDrawable);
-                                update(null, MaterialValueHelper.getSecondaryTextColor(service, true));
+                                int playPauseRes = isPlaying ? R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_white_24dp;
+                                appWidgetView.setInt(R.id.content, "setBackgroundColor", Color.BLACK);
+                                appWidgetView.setInt(R.id.media_titles, "setBackgroundColor", Color.BLACK);
+                                appWidgetView.setInt(R.id.media_actions, "setBackgroundColor", Color.BLACK);
+                                appWidgetView.setImageViewBitmap(R.id.button_toggle_play_pause, createBitmap(Util.getTintedVectorDrawable(service, playPauseRes, Color.WHITE), 1.4f));
+                                appWidgetView.setImageViewBitmap(R.id.button_next, createBitmap(Util.getTintedVectorDrawable(service, R.drawable.ic_skip_next_white_24dp, Color.WHITE), 1.5f));
+                                appWidgetView.setImageViewBitmap(R.id.button_prev, createBitmap(Util.getTintedVectorDrawable(service, R.drawable.ic_skip_previous_white_24dp, Color.WHITE), 1.4f));
+                                appWidgetView.setImageViewResource(R.id.image, R.drawable.default_album_art);
+                                appWidgetView.setTextColor(R.id.title, Color.WHITE);
+                                appWidgetView.setTextColor(R.id.text, Color.WHITE);
+                                appWidgetView.setImageViewResource(R.id.image, R.drawable.default_album_art);  //sets the default album art on startup
+
+
+                                pushUpdate(appContext, appWidgetIds, appWidgetView);
                             }
 
                             private void update(@Nullable Bitmap bitmap, int color) {
+
                                 // Set correct drawable for pause state
                                 int playPauseRes = isPlaying ? R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_white_24dp;
-                                appWidgetView.setImageViewBitmap(R.id.button_toggle_play_pause, createBitmap(Util.getTintedVectorDrawable(service, playPauseRes, color), 1f));
-
-                                // Set prev/next button drawables
-                                appWidgetView.setImageViewBitmap(R.id.button_next, createBitmap(Util.getTintedVectorDrawable(service, R.drawable.ic_skip_next_white_24dp, color), 1f));
-                                appWidgetView.setImageViewBitmap(R.id.button_prev, createBitmap(Util.getTintedVectorDrawable(service, R.drawable.ic_skip_previous_white_24dp, color), 1f));
 
                                 final Drawable image = getAlbumArtDrawable(service.getResources(), bitmap);
                                 final Bitmap roundedBitmap = createRoundedBitmap(image, imageSize, imageSize, cardRadius, 0, cardRadius, 0);
+
+                                if (bitmap != null) {
+
+
+                                    int backgroundColor = 0;
+
+                                    int byFour = roundedBitmap.getWidth() / 2;
+                                    int myLeft = roundedBitmap.getWidth() - byFour;
+
+
+                                    //Get some colors :)
+
+                                    Palette.Builder paletteBuilder = Palette.from(roundedBitmap)
+                                            .setRegion(myLeft, 0, roundedBitmap.getWidth(), bitmap.getHeight())
+
+                                            .clearFilters();// we want all colors, red / white / black ones too!
+                                    Palette palette = paletteBuilder.generate();
+                                    backgroundColor = findBackgroundColorAndFilter(palette);
+
+                                    //try to shift background lighter or darker ??
+                                    int myShiftedBackgroundColor = NotificationColorUtil.getShiftedColor(backgroundColor, 0);
+
+
+                                    setBackgroundColor(myShiftedBackgroundColor);
+
+
+                                    // we want most of the full region again, slightly shifted to the right
+                                    float textColorStartWidthFraction = 0.0f;
+
+
+                                    //  Palette.Builder textPaletteBuilder = Palette.from(roundedBitmap)
+                                    paletteBuilder.setRegion((int) (roundedBitmap.getWidth() * textColorStartWidthFraction), 0,
+                                            bitmap.getWidth(),
+                                            bitmap.getHeight());
+                                    if (mFilteredBackgroundHsl != null) {
+                                        paletteBuilder.addFilter((rgb, hsl) -> {
+                                            // at least 10 degrees hue difference
+                                            float diff = Math.abs(hsl[0] - mFilteredBackgroundHsl[0]);
+                                            return diff > 10 && diff < 350;//  return diff > 10 && diff < 350;
+                                        });
+                                    }
+
+                                    paletteBuilder.addFilter(mBlackWhiteFilter);
+
+
+                                    Palette TextPalette = paletteBuilder.generate();
+                                    int foregroundColor = selectForegroundColor(backgroundColor, TextPalette);
+
+
+
+
+
+
+
+                                    if (NotificationColorUtil.isColorBackgroundLight(backgroundColor)) {
+                                        //background was lighter color ??
+
+
+
+
+                                        int myContrastColor;
+                                        myContrastColor = NotificationColorUtil.findContrastColor(foregroundColor, backgroundColor, true, 3);  //5 is good so far current is 3
+
+
+                                        int myShiftedSongTextColor = NotificationColorUtil.getShiftedColor(myContrastColor , 20);
+                                        int myShiftedArtistTextColor = NotificationColorUtil.getShiftedColor(myContrastColor , 1);
+
+
+                                        appWidgetView.setTextColor(R.id.title, myShiftedSongTextColor);
+                                        appWidgetView.setTextColor(R.id.text, myShiftedArtistTextColor);  //  appWidgetView.setTextColor(R.id.text, myShiftedArtistTextColor);
+
+
+
+                                        // below sets controls only
+                                        setForegroundColor(myShiftedSongTextColor);
+
+
+
+                                    }else{
+
+                                        //background was determed to be dark
+
+                                        int checkVibrantColor = TextPalette.getVibrantColor(TextPalette.getVibrantColor(1));
+
+                                        int myContrastColor;
+                                        myContrastColor = NotificationColorUtil.findContrastColorAgainstDark(foregroundColor, backgroundColor, true, 4);  //5 is good so far  3.5  last was 4
+
+
+                                        int myShiftedSongTextColor = NotificationColorUtil.getShiftedColor(myContrastColor , -5);  // -1
+                                        int myShiftedArtistTextColor = NotificationColorUtil.getShiftedColor(myContrastColor , 8); //10
+
+
+                                        appWidgetView.setTextColor(R.id.title, myShiftedSongTextColor);
+                                        appWidgetView.setTextColor(R.id.text, myShiftedArtistTextColor);  //  appWidgetView.setTextColor(R.id.text, myShiftedArtistTextColor);
+                                        // below sets controls only
+                                        setForegroundColor(myShiftedSongTextColor);
+
+                                    }
+
+
+
+
+                                }
+
+                          //      final Bitmap myBitmapsImage = addGradient(roundedBitmap);
                                 appWidgetView.setImageViewBitmap(R.id.image, roundedBitmap);
+
+
+
+
+
+
+
+
+
 
                                 pushUpdate(service, appWidgetIds, appWidgetView);
                             }
+
+
+                            private int selectForegroundColor(int backgroundColor, Palette palette) {
+                                if (NotificationColorUtil.isColorLight(backgroundColor)) {
+                                    return selectForegroundColorForSwatches(palette.getDarkVibrantSwatch(),
+                                            palette.getVibrantSwatch(),
+                                            palette.getDarkMutedSwatch(),
+                                            palette.getMutedSwatch(),
+                                            palette.getDominantSwatch(),
+                                            Color.BLACK);
+                                } else {
+                                    return selectForegroundColorForSwatches(palette.getLightVibrantSwatch(),
+                                            palette.getVibrantSwatch(),
+                                            palette.getLightMutedSwatch(),
+                                            palette.getMutedSwatch(),
+                                            palette.getDominantSwatch(),
+                                            Color.WHITE);
+                                }
+                            }
+                            //put vibrant first
+                            private int selectForegroundColorForSwatches(Palette.Swatch vibrant,
+                                                                         Palette.Swatch moreVibrant, Palette.Swatch moreMutedSwatch, Palette.Swatch mutedSwatch,
+                                                                         Palette.Swatch dominantSwatch, int fallbackColor) {
+                                Palette.Swatch coloredCandidate = selectVibrantCandidate(moreVibrant, vibrant);
+                                if (coloredCandidate == null) {
+                                    coloredCandidate = selectMutedCandidate(mutedSwatch, moreMutedSwatch);
+                                }
+                                if (coloredCandidate != null) {
+                                    if (dominantSwatch == coloredCandidate) {
+                                        return coloredCandidate.getRgb();
+                                    } else if ((float) coloredCandidate.getPopulation() / dominantSwatch.getPopulation()
+                                            < POPULATION_FRACTION_FOR_DOMINANT
+                                            && dominantSwatch.getHsl()[1] > MIN_SATURATION_WHEN_DECIDING) {
+                                        return dominantSwatch.getRgb();
+                                    } else {
+                                        return coloredCandidate.getRgb();
+                                    }
+                                } else if (hasEnoughPopulation(dominantSwatch)) {
+                                    return dominantSwatch.getRgb();
+                                } else {
+                                    return fallbackColor;
+                                }
+                            }
+
+                            private Palette.Swatch selectMutedCandidate(Palette.Swatch first,
+                                                                        Palette.Swatch second) {
+                                boolean firstValid = hasEnoughPopulation(first);
+                                boolean secondValid = hasEnoughPopulation(second);
+                                if (firstValid && secondValid) {
+                                    float firstSaturation = first.getHsl()[1];
+                                    float secondSaturation = second.getHsl()[1];
+                                    float populationFraction = first.getPopulation() / (float) second.getPopulation();
+                                    if (firstSaturation * populationFraction > secondSaturation) {
+                                        return first;
+                                    } else {
+                                        return second;
+                                    }
+                                } else if (firstValid) {
+                                    return first;
+                                } else if (secondValid) {
+                                    return second;
+                                }
+                                return null;
+                            }
+
+                            private Palette.Swatch selectVibrantCandidate(Palette.Swatch first, Palette.Swatch second) {
+                                boolean firstValid = hasEnoughPopulation(first);
+                                boolean secondValid = hasEnoughPopulation(second);
+                                if (firstValid && secondValid) {
+                                    int firstPopulation = first.getPopulation();
+                                    int secondPopulation = second.getPopulation();
+                                    if (firstPopulation / (float) secondPopulation
+                                            < POPULATION_FRACTION_FOR_MORE_VIBRANT) {
+                                        return second;
+                                    } else {
+                                        return first;
+                                    }
+                                } else if (firstValid) {
+                                    return first;
+                                } else if (secondValid) {
+                                    return second;
+                                }
+                                return null;
+                            }
+
+                            private boolean hasEnoughPopulation(Palette.Swatch swatch) {
+                                // We want a fraction that is at least 1% of the image
+                                return swatch != null
+                                        && (swatch.getPopulation() / (float) RESIZE_BITMAP_AREA > MINIMUM_IMAGE_FRACTION); //    && (swatch.getPopulation() / (float) RESIZE_BITMAP_AREA > MINIMUM_IMAGE_FRACTION);
+                            }
+
+                            private int findBackgroundColorAndFilter(Palette palette) {
+                                // by default we use the dominant palette
+                                Palette.Swatch dominantSwatch = palette.getDominantSwatch();
+                                if (dominantSwatch == null) {
+                                    // We're not filtering on white or black
+                                    mFilteredBackgroundHsl = null;
+                                    return Color.WHITE;
+                                }
+                                if (!isWhiteOrBlack(dominantSwatch.getHsl())) {
+                                    mFilteredBackgroundHsl = dominantSwatch.getHsl();
+                                    return dominantSwatch.getRgb();
+                                }
+                                // Oh well, we selected black or white. Lets look at the second color!
+                                List<Palette.Swatch> swatches = palette.getSwatches();
+                                float highestNonWhitePopulation = -1;
+                                Palette.Swatch second = null;
+                                for (Palette.Swatch swatch : swatches) {
+                                    if (swatch != dominantSwatch
+                                            && swatch.getPopulation() > highestNonWhitePopulation
+                                            && !isWhiteOrBlack(swatch.getHsl())) {
+                                        second = swatch;
+                                        highestNonWhitePopulation = swatch.getPopulation();
+                                    }
+                                }
+                                if (second == null) {
+                                    // We're not filtering on white or black
+                                    mFilteredBackgroundHsl = null;
+                                    return dominantSwatch.getRgb();
+                                }
+                                if (dominantSwatch.getPopulation() / highestNonWhitePopulation
+                                        > POPULATION_FRACTION_FOR_WHITE_OR_BLACK) {
+                                    // The dominant swatch is very dominant, lets take it!
+                                    // We're not filtering on white or black
+                                    mFilteredBackgroundHsl = null;
+                                    return dominantSwatch.getRgb();
+                                } else {
+                                    mFilteredBackgroundHsl = second.getHsl();
+                                    return second.getRgb();
+                                }
+                            }
+
+                            private boolean isWhiteOrBlack(float[] hsl) {
+                                return isBlack(hsl) || isWhite(hsl);
+                            }
+
+                            /**
+                             * @return true if the color represents a color which is close to black.
+                             */
+                            private boolean isBlack(float[] hslColor) {
+                                return hslColor[2] <= BLACK_MAX_LIGHTNESS;
+                            }
+
+                            /**
+                             * @return true if the color represents a color which is close to white.
+                             */
+                            private boolean isWhite(float[] hslColor) {
+                                return hslColor[2] >= WHITE_MIN_LIGHTNESS;
+                            }
+
+
+
                         });
             }
+
+
+            private void setBackgroundColor(Integer color)
+            {
+                appWidgetView.setInt(R.id.content, "setBackgroundColor", color);
+                appWidgetView.setInt(R.id.media_titles, "setBackgroundColor", color);
+                appWidgetView.setInt(R.id.media_titles, "setBackgroundColor", color);
+                appWidgetView.setInt(R.id.media_actions, "setBackgroundColor", color);
+            }
+
+            private void setForegroundColor(Integer color)
+            {
+
+                int playPauseRes = isPlaying ? R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_white_24dp;
+                appWidgetView.setImageViewBitmap(R.id.button_toggle_play_pause, createBitmap(getVibrantTintedVectorDrawables(service, playPauseRes, color), 1.4f));
+                appWidgetView.setImageViewBitmap(R.id.button_next, createBitmap(getVibrantTintedVectorDrawables(service, R.drawable.ic_skip_next_white_24dp, color), 1.5f));
+                appWidgetView.setImageViewBitmap(R.id.button_prev, createBitmap(getVibrantTintedVectorDrawables(service, R.drawable.ic_skip_previous_white_24dp, color), 1.4f));
+
+
+                pushUpdate(appContext, appWidgetIds, appWidgetView);
+            }
+
+
+
+
         });
     }
+
+
+
+    public static Drawable getVectorDrawable(@NonNull Resources res, @DrawableRes int resId, @Nullable Resources.Theme theme) {
+        if (Build.VERSION.SDK_INT >= 21) {
+            return res.getDrawable(resId, theme);
+        }
+        return VectorDrawableCompat.create(res, resId, theme);
+    }
+
+    public static Drawable getVibrantTintedVectorDrawables(@NonNull Context context, @DrawableRes int id, @ColorInt int color) {
+        return TintHelper.createTintedDrawable(getVectorDrawable(context.getResources(), id, context.getTheme()), color);
+    }
+
+
+//googles code
+
+    private boolean isWhiteOrBlack(float[] hsl) {
+        return isBlack(hsl) || isWhite(hsl);
+    }
+    /**
+     * @return true if the color represents a color which is close to black.
+     */
+    private boolean isBlack(float[] hslColor) {
+        return hslColor[2] <= BLACK_MAX_LIGHTNESS;
+    }
+    /**
+     * @return true if the color represents a color which is close to white.
+     */
+    private boolean isWhite(float[] hslColor) {
+        return hslColor[2] >= WHITE_MIN_LIGHTNESS;
+    }
+
+
+
+    //emd googles code
+
+
+
+
+
+
+
+
+
 
     /**
      * Link up various button actions using {@link PendingIntent}.

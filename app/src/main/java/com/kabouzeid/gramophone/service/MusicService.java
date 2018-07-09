@@ -42,6 +42,8 @@ import com.kabouzeid.gramophone.R;
 import com.kabouzeid.gramophone.appwidgets.AppWidgetBig;
 import com.kabouzeid.gramophone.appwidgets.AppWidgetCard;
 import com.kabouzeid.gramophone.appwidgets.AppWidgetClassic;
+import com.kabouzeid.gramophone.appwidgets.AppWidgetClock;
+import com.kabouzeid.gramophone.appwidgets.AppWidgetTester;
 import com.kabouzeid.gramophone.appwidgets.AppWidgetSmall;
 import com.kabouzeid.gramophone.glide.BlurTransformation;
 import com.kabouzeid.gramophone.glide.SongGlideRequest;
@@ -127,9 +129,11 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
     private final IBinder musicBind = new MusicBinder();
 
     private AppWidgetBig appWidgetBig = AppWidgetBig.getInstance();
+    private AppWidgetClock appWidgetClock = AppWidgetClock.getInstance();
     private AppWidgetClassic appWidgetClassic = AppWidgetClassic.getInstance();
     private AppWidgetSmall appWidgetSmall = AppWidgetSmall.getInstance();
     private AppWidgetCard appWidgetCard = AppWidgetCard.getInstance();
+    private AppWidgetTester appWidgetTester = AppWidgetTester.getInstance();
 
     private Playback playback;
     private ArrayList<Song> playingQueue = new ArrayList<>();
@@ -1035,9 +1039,12 @@ public class MusicService extends Service implements SharedPreferences.OnSharedP
     private void sendChangeInternal(final String what) {
         sendBroadcast(new Intent(what));
         appWidgetBig.notifyChange(this, what);
+        appWidgetClock.notifyChange(this, what);
         appWidgetClassic.notifyChange(this, what);
         appWidgetSmall.notifyChange(this, what);
         appWidgetCard.notifyChange(this, what);
+        appWidgetTester.notifyChange(this, what);
+
     }
 
     private static final long MEDIA_SESSION_ACTIONS = PlaybackStateCompat.ACTION_PLAY

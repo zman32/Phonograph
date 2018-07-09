@@ -6,26 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.LinearGradient;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.Canvas;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Shader;
-import android.os.Build;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
 import android.support.graphics.drawable.VectorDrawableCompat;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.media.app.NotificationCompat.MediaStyle;
-
-
 import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.view.View;
@@ -35,7 +23,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
-import com.kabouzeid.appthemehelper.util.ColorUtil;
 import com.kabouzeid.appthemehelper.util.MaterialValueHelper;
 import com.kabouzeid.appthemehelper.util.TintHelper;
 import com.kabouzeid.gramophone.R;
@@ -46,19 +33,17 @@ import com.kabouzeid.gramophone.model.Song;
 import com.kabouzeid.gramophone.service.MusicService;
 import com.kabouzeid.gramophone.ui.activities.MainActivity;
 import com.kabouzeid.gramophone.util.NotificationColorUtil;
-import com.kabouzeid.gramophone.util.PhonographColorUtil;
-import com.kabouzeid.gramophone.util.PreferenceUtil;
 import com.kabouzeid.gramophone.util.Util;
 
 import java.util.List;
 
-public class AppWidgetBig extends BaseAppWidget {
-    public static final String NAME = "app_widget_big";
+public class AppWidgetTester extends BaseAppWidget {
+    public static final String NAME = "app_widget_tester";
     //google's code
     /**
      * The fraction below which we select the vibrant instead of the light/dark vibrant color
      */
-    private static final float POPULATION_FRACTION_FOR_MORE_VIBRANT = 0.2f; // 1f
+    private static final float POPULATION_FRACTION_FOR_MORE_VIBRANT = 1.0f; // 1f
     /**
      * Minimum saturation that a muted color must have if there exists if deciding between two
      * colors
@@ -88,14 +73,14 @@ public class AppWidgetBig extends BaseAppWidget {
     //end google's code
 
 
-    private static AppWidgetBig mInstance;
+    private static AppWidgetTester mInstance;
     private static int imageSize = 0;
     private static float cardRadius = 0f;
     private Target<BitmapPaletteWrapper> target; // for cancellation
 
-    public static synchronized AppWidgetBig getInstance() {
+    public static synchronized AppWidgetTester getInstance() {
         if (mInstance == null) {
-            mInstance = new AppWidgetBig();
+            mInstance = new AppWidgetTester();
         }
         return mInstance;
     }
@@ -112,15 +97,15 @@ public class AppWidgetBig extends BaseAppWidget {
      * default click and hide actions if service not running.
      */
     protected void defaultAppWidget(final Context context, final int[] appWidgetIds) {
-        final RemoteViews appWidgetView = new RemoteViews(context.getPackageName(), R.layout.app_widget_big);
+        final RemoteViews appWidgetView = new RemoteViews(context.getPackageName(), R.layout.app_widget_tester);
 
-        appWidgetView.setImageViewResource(R.id.image, R.drawable.default_album_art);  //sets the default album art on startup
-
-
-        appWidgetView.setInt(R.id.media_titles, "setBackgroundColor", Color.BLACK);
+        //appWidgetView.setImageViewResource(R.id.image, R.drawable.default_album_art);  //sets the default album art on startup
 
 
-        linkButtons(context, appWidgetView);
+        appWidgetView.setInt(R.id.media_titles, "setBackgroundColor", Color.WHITE);
+
+
+       // linkButtons(context, appWidgetView);
         pushUpdate(context, appWidgetIds, appWidgetView);
     }
 
@@ -128,7 +113,7 @@ public class AppWidgetBig extends BaseAppWidget {
      * Update all active widget instances by pushing changes
      */
     public void performUpdate(final MusicService service, final int[] appWidgetIds) {
-        final RemoteViews appWidgetView = new RemoteViews(service.getPackageName(), R.layout.app_widget_big);
+        final RemoteViews appWidgetView = new RemoteViews(service.getPackageName(), R.layout.app_widget_tester);
 
         final boolean isPlaying = service.isPlaying();
         final Song song = service.getCurrentSong();
@@ -138,11 +123,15 @@ public class AppWidgetBig extends BaseAppWidget {
             appWidgetView.setViewVisibility(R.id.media_titles, View.INVISIBLE);
         } else {
             // this is setting the default background colors black and text colors white ok
-            appWidgetView.setViewVisibility(R.id.media_titles, View.VISIBLE);
-            appWidgetView.setTextViewText(R.id.title, song.title);
-            appWidgetView.setTextViewText(R.id.text, getSongArtistAndAlbum(song));
-            appWidgetView.setTextColor(R.id.title, Color.WHITE);
+           appWidgetView.setViewVisibility(R.id.media_titles, View.VISIBLE);
+           appWidgetView.setTextViewText(R.id.title, song.title);
+           appWidgetView.setTextViewText(R.id.text, getSongArtistAndAlbum(song));
+         //   appWidgetView.setTextColor(R.id.title, Color.WHITE);
             appWidgetView.setTextColor(R.id.text, Color.WHITE);
+
+          //  appWidgetView.setTextViewText(R.id.buttonVibrant, "Got Media tits");
+
+
         }
 
         // Link actions buttons to intents
@@ -182,19 +171,25 @@ public class AppWidgetBig extends BaseAppWidget {
                                 super.onLoadFailed(e, errorDrawable);
 
                                 // do all bitmap is null stuff here gets rid of flickering
-                                int playPauseRes = isPlaying ? R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_white_24dp;
+
+                                appWidgetView.setInt(R.id.buttonVibrant, "setBackgroundColor", Color.BLACK);
+                                appWidgetView.setInt(R.id.buttonMorevibrant, "setBackgroundColor", Color.BLACK);
+                                appWidgetView.setInt(R.id.buttonDarkvibrant, "setBackgroundColor", Color.BLACK);
+                                appWidgetView.setInt(R.id.buttonLightmuted, "setBackgroundColor", Color.BLACK);
+                                appWidgetView.setInt(R.id.buttonMuted, "setBackgroundColor", Color.BLACK);
+                                appWidgetView.setInt(R.id.buttonDarkmuted, "setBackgroundColor", Color.BLACK);
+
+
+
+
                                 //  appWidgetView.setInt(R.id.content, "setBackgroundColor", Color.BLACK);
                                 appWidgetView.setInt(R.id.media_titles, "setBackgroundColor", Color.BLACK);
-
-                                appWidgetView.setImageViewResource(R.id.image, R.drawable.default_album_art);
-                                appWidgetView.setTextColor(R.id.title, Color.WHITE);
-                                appWidgetView.setTextColor(R.id.text, Color.WHITE);
-                                appWidgetView.setImageViewResource(R.id.image, R.drawable.default_album_art);  //sets the default album art on startup
+                              //  appWidgetView.setInt(R.id.buttonVibrant, "setBackgroundColor", Color.YELLOW);
+                           //     appWidgetView.setTextViewText(R.id.buttonVibrant, "On  load fuction failed");
+                                appWidgetView.setTextColor(R.id.title, Color.BLACK);
+                                appWidgetView.setTextColor(R.id.text, Color.BLUE);
 
                                 Bitmap myBmp = createBitmap(Util.getVectorDrawable(service, R.drawable.default_album_art), 1f);
-
-
-                                appWidgetView.setImageViewBitmap(R.id.image, myBmp);
 
 
                                 pushUpdate(appContext, appWidgetIds, appWidgetView);
@@ -202,17 +197,22 @@ public class AppWidgetBig extends BaseAppWidget {
                             }
 
                             private void update(@Nullable Bitmap bitmap, int bgColor) {
-                                // Set correct drawable for pause state
+                                // Set all buttons black
+                                appWidgetView.setInt(R.id.buttonVibrant, "setBackgroundColor", Color.BLACK);
+                                appWidgetView.setInt(R.id.buttonMorevibrant, "setBackgroundColor", Color.BLACK);
+                                appWidgetView.setInt(R.id.buttonDarkvibrant, "setBackgroundColor", Color.BLACK);
+                                appWidgetView.setInt(R.id.buttonLightmuted, "setBackgroundColor", Color.BLACK);
+                                appWidgetView.setInt(R.id.buttonMuted, "setBackgroundColor", Color.BLACK);
+                                appWidgetView.setInt(R.id.buttonDarkmuted, "setBackgroundColor", Color.BLACK);
 
-                                int playPauseRes = isPlaying ? R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_white_24dp;
                                 final Drawable image = getAlbumArtDrawable(service.getResources(), bitmap);
                                 final Bitmap roundedBitmap = createRoundedBitmap(image, imageSize, imageSize, cardRadius, 0, cardRadius, 0);
 
 
                                 // get some colors for text and background
-                                if (bitmap != null) {
+                                if (roundedBitmap != null) {
 
-
+                                  //  appWidgetView.setInt(R.id.buttonVibrant, "setBackgroundColor", Color.MAGENTA);
                                     int backgroundColor = 0;
 
 
@@ -225,10 +225,8 @@ public class AppWidgetBig extends BaseAppWidget {
 
 
 
-                                    Palette.Builder paletteBuilder = Palette.from(roundedBitmap)//
-                                            .setRegion(0, myLeft, bitmap.getWidth(), bitmap.getHeight())
-
-
+                                    Palette.Builder paletteBuilder = Palette.from(bitmap)//
+                                            .setRegion(0, 0, bitmap.getWidth() /2 , bitmap.getHeight())
                                             .clearFilters();// we want all colors, red / white / black ones too!
                                     Palette palette = paletteBuilder.generate();
                                     backgroundColor = findBackgroundColorAndFilter(palette);
@@ -237,7 +235,88 @@ public class AppWidgetBig extends BaseAppWidget {
                                     int myShiftedBackgroundColor = NotificationColorUtil.getShiftedColor(backgroundColor, 0);
 
 
-                                    setBackgroundColor(myShiftedBackgroundColor);
+                                    setBackgroundColor(backgroundColor);
+
+
+                                    // set colors
+                                    Palette.Swatch vibrantSwatch = palette.getVibrantSwatch();
+                                    Palette.Swatch moreVibrantSwatch = palette.getLightVibrantSwatch();
+                                    Palette.Swatch darkVibrantSwatch = palette.getDarkVibrantSwatch();
+                                  //  Palette.Swatch LightMuted = palette.getLightMutedSwatch();
+                                    Palette.Swatch lightMutedSwatch = palette.getLightMutedSwatch();
+                                    Palette.Swatch mutedSwatch = palette.getMutedSwatch();
+                                    Palette.Swatch darkMutedSwatch = palette.getDarkMutedSwatch();
+
+
+
+
+                                    if (vibrantSwatch != null){
+
+                                        // appWidgetView.setTextViewText(R.id.Hour, song.title);
+                                        int theVibrantColor = vibrantSwatch.getRgb();
+
+                                        //appWidgetView.setTextColor(R.id.buttonVibrant, (theVibrantColor));
+                                        appWidgetView.setInt(R.id.buttonVibrant, "setBackgroundColor", theVibrantColor);
+
+                                    }
+
+                                    //more vibrant
+                                    if (moreVibrantSwatch != null){
+
+                                        int theMoreVibrantColor = moreVibrantSwatch.getRgb();
+
+
+                                        appWidgetView.setInt(R.id.buttonMorevibrant, "setBackgroundColor", theMoreVibrantColor);
+                                    }
+
+
+
+
+                                    //dark vibrant
+                                    if (darkVibrantSwatch != null){
+
+                                        int theDarkVibrantColor = darkVibrantSwatch.getRgb();
+
+
+                                        appWidgetView.setInt(R.id.buttonDarkvibrant, "setBackgroundColor", theDarkVibrantColor);
+                                    }
+
+
+
+
+                                    //light muted
+                                    if (lightMutedSwatch != null){
+
+                                        int theLightMutedColor = lightMutedSwatch.getRgb();
+
+
+                                        appWidgetView.setInt(R.id.buttonLightmuted, "setBackgroundColor", theLightMutedColor);
+                                    }
+
+
+
+                                    //Muted
+                                    if (mutedSwatch != null){
+
+                                        int theMutedColor = mutedSwatch.getRgb();
+
+
+                                        appWidgetView.setInt(R.id.buttonMuted, "setBackgroundColor", theMutedColor);
+                                    }
+
+
+
+
+                                    //Dark Muted
+                                    if (darkMutedSwatch != null){
+
+                                        int theDarkMutedColor = darkMutedSwatch.getRgb();
+
+
+                                        appWidgetView.setInt(R.id.buttonDarkmuted, "setBackgroundColor", theDarkMutedColor);
+                                    }
+
+
 
 
                                     // we want most of the full region again, slightly shifted to the right
@@ -264,7 +343,7 @@ public class AppWidgetBig extends BaseAppWidget {
 
 
 
-
+                                    appWidgetView.setTextColor(R.id.TextForeground, foregroundColor);
 
 
 
@@ -319,8 +398,8 @@ public class AppWidgetBig extends BaseAppWidget {
                                 }
 
 
-                                final Bitmap myBitmapsImage = roundedBitmap;
-                                appWidgetView.setImageViewBitmap(R.id.image, myBitmapsImage);
+                             final Bitmap myBitmapsImage = roundedBitmap;
+                               // appWidgetView.setImageViewBitmap(R.id.image, myBitmapsImage);
 
 
 
@@ -498,7 +577,7 @@ public class AppWidgetBig extends BaseAppWidget {
             private void setForegroundColor(Integer color)
             {
 
-                int playPauseRes = isPlaying ? R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_white_24dp;
+
 
 
 
@@ -554,28 +633,6 @@ public class AppWidgetBig extends BaseAppWidget {
      * Link up various button actions using {@link PendingIntent}.
      */
     private void linkButtons(final Context context, final RemoteViews views) {
-        Intent action;
-        PendingIntent pendingIntent;
 
-        final ComponentName serviceName = new ComponentName(context, MusicService.class);
-
-        // Home
-        action = new Intent(context, MainActivity.class);
-        action.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        pendingIntent = PendingIntent.getActivity(context, 0, action, 0);
-        views.setOnClickPendingIntent(R.id.image, pendingIntent);
-        views.setOnClickPendingIntent(R.id.media_titles, pendingIntent);
-
-        // Previous track
-        pendingIntent = buildPendingIntent(context, MusicService.ACTION_REWIND, serviceName);
-        views.setOnClickPendingIntent(R.id.button_prev, pendingIntent);
-
-        // Play and pause
-        pendingIntent = buildPendingIntent(context, MusicService.ACTION_TOGGLE_PAUSE, serviceName);
-        views.setOnClickPendingIntent(R.id.button_toggle_play_pause, pendingIntent);
-
-        // Next track
-        pendingIntent = buildPendingIntent(context, MusicService.ACTION_SKIP, serviceName);
-        views.setOnClickPendingIntent(R.id.button_next, pendingIntent);
     }
 }

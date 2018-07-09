@@ -9,6 +9,11 @@
         android:id="@+id/image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="0dp"
+        android:adjustViewBounds="true"
+        android:cropToPadding="true"
         android:scaleType="centerCrop"
         tools:ignore="ContentDescription"
         tools:src="@drawable/default_album_art" />
@@ -16,9 +21,10 @@
     <LinearLayout
         android:id="@+id/media_actions"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/shadow_up_strong"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+
+        android:layout_alignParentTop="true"
         android:layoutDirection="ltr"
         android:orientation="horizontal"
         android:padding="16dp">
@@ -30,7 +36,7 @@
             android:layout_weight="1"
             android:background="@drawable/widget_selector_dark"
             tools:ignore="ContentDescription"
-            tools:src="@drawable/ic_skip_previous_white_24dp"
+
             tools:tint="@color/ate_primary_text_dark" />
 
         <ImageButton
@@ -58,39 +64,62 @@
     <FrameLayout
         android:id="@+id/clickable_area"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="266dp"
         android:layout_above="@id/media_actions"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="71dp" />
+
+
+
+
+
 
     <LinearLayout
+
+
+
+
+
         android:id="@+id/media_titles"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:background="@drawable/shadow_down_strong"
+        android:src="@drawable/line_horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:foreground="@drawable/line_horizontal">
+
+
+
+
+
 
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"
             android:gravity="center_vertical"
             android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-            android:textColor="@color/ate_primary_text_dark"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:textColor="@android:color/white"
+            android:textSize="18.5sp"
+            android:textStyle="bold"
             tools:text="Title" />
 
         <TextView
             android:id="@+id/text"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:textColor="@color/ate_secondary_text_dark"
+            android:textColor="#a6dce4"
+            android:textSize="17sp"
+
+            android:textStyle="bold"
             tools:text="Text" />
 
     </LinearLayout>
